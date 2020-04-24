@@ -36,6 +36,20 @@
         android:onClick="postRequest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/btn_post_url_result"
+        android:textAllCaps="false"
+        android:text="postResultUrl"
+        android:onClick="postWithParams"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/btn_get_url_result"
+        android:textAllCaps="false"
+        android:text="getResultUrl"
+        android:onClick="getWithParams"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
     <ImageView
         android:id="@+id/image_result"
         android:visibility="gone"
@@ -43,7 +57,9 @@
         android:layout_height="wrap_content"/>
     <TextView
         android:id="@+id/text_result_post"
+        android:layout_gravity="bottom"
         android:visibility="gone"
+        android:background="@color/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <androidx.recyclerview.widget.RecyclerView

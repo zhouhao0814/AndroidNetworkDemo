@@ -34,6 +34,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     private Button mBtnJson;
     private Button mLoadImage;
     private Button mPostResult;
+    private ImageView mImageResult;
+    private TextView mPostResult1;
+    private String result = null;
     
     //Activity start .
     @Override
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         mBtnJson = findViewById(R.id.btn_json);
         mLoadImage = findViewById(R.id.btn_image);
         mPostResult = findViewById(R.id.btn_post_result);
+        mPostResult1 = findViewById(R.id.text_result_post);
         
         mHandler = new Handler(){
             @Override
@@ -144,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
     public void loadData(View view){
         mButton.setVisibility(View.GONE);
         mBtnJson.setVisibility(View.GONE);
+        mPostResult1.setVisibility(View.GONE);
         mResultList.setVisibility(View.VISIBLE);
         new Thread(new Runnable() {
             @Override
@@ -187,13 +194,14 @@ public class MainActivity extends AppCompatActivity {
                     final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                     runOnUiThread(new Runnable() {
     
-                        private ImageView mImageResult;
+               
     
                         @Override
                         public void run() {
                             mImageResult = findViewById(R.id.image_result);
                             mImageResult.setVisibility(View.VISIBLE);
                             mImageResult.setImageBitmap(bitmap);
+                            
                         }
                     });
                 } catch (IOException e) {
@@ -203,14 +211,13 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
     public void postRequest(View view){
+        
         new Thread(new Runnable() {
             @Override
             public void run() {
                 OutputStream outputStream = null;
                 InputStream inputStream = null;
                 try {
-                    TextView postResult = findViewById(R.id.text_result_post);
-                    postResult.setVisibility(View.VISIBLE);
                     URL url = new URL("http://192.168.0.2:9102/post/comment");
                     HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                     httpURLConnection.setRequestMethod("POST");
@@ -235,9 +242,18 @@ public class MainActivity extends AppCompatActivity {
                     if (responseCode == httpURLConnection.HTTP_OK) {
                         inputStream = httpURLConnection.getInputStream();
                         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                        Log.d(TAG,"result -- > " + bufferedReader.readLine());
-                        postResult.setText( bufferedReader.readLine());
+                        result = bufferedReader.readLine();
+                      
                     }
+                    runOnUiThread(new Runnable() {//一定要在这里设置，不然显示不出来UI。
+                        @Override
+                        public void run() {
+//                            mImageResult.setVisibility(View.GONE);
+                            mPostResult1.setVisibility(View.VISIBLE);
+                            mPostResult1.setText(result);
+                            Log.d(TAG,"result -- > " + result);
+                        }
+                    });
     
                 }catch (Exception e){
                     e.printStackTrace();
@@ -249,5 +265,80 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
         
+    }
+    public void postWithParams(View view){
+        Map<String, String> params = new HashMap<>();
+        params.put("string", "这是我提交的字符串");
+        startRequest(params,"POST","/post/string");
+    }
+    public void getWithParams(View view){
+        Map<String, String> params = new HashMap<>();
+        params.put("keyword","这是我的关键字Keyword");
+        params.put("page","12");
+        params.put("order", "0");
+        startRequest(params,"GET","/get/param");
+    }
+    
+    private void startRequest(final Map<String, String> params, final String method, final String api) {
+        new Thread(new Runnable() {
+    
+            private BufferedReader mBufferedReader;
+            private URL mUrl;
+    
+            @Override
+            public void run() {
+                try {
+                    //组装参数
+                    StringBuilder sb = new StringBuilder();
+                    if (params != null && params.size() > 0) {
+                        sb.append("?");
+                        Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+                        while (iterator.hasNext()) {
+                            Map.Entry<String, String> next = iterator.next();
+                            sb.append(next.getKey());
+                            sb.append("=");
+                            sb.append(next.getValue());
+                            if (iterator.hasNext()) {
+                                sb.append("&");
+                            }
+                        }
+                        Log.d(TAG,"sb result -->" + sb.toString());
+                    }
+                    String params = sb.toString();
+                    String BASE_URL = "http://192.168.0.2:9102";
+                    
+                    if (params != null && params.length() > 0) {
+                        mUrl = new URL(BASE_URL + api + params);
+//                        Log.d(TAG,"mUrl1" +mUrl);
+                    }else {
+                        mUrl = new URL(BASE_URL + api);
+//                        Log.d(TAG,"mUrl2" +mUrl);
+                    }
+                    Log.d(TAG,"mUrl" +mUrl.toString());
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) mUrl.openConnection();
+                    httpURLConnection.setRequestMethod(method);
+                    httpURLConnection.setRequestProperty("Accept-Language","zh-CN,zh;q=0.9");
+                    httpURLConnection.setRequestProperty("Accept","*/*");
+                    httpURLConnection.connect();
+                    int responseCode = httpURLConnection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        InputStream inputStream = httpURLConnection.getInputStream();
+                        mBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                        String json = mBufferedReader.readLine();
+                        Log.d(TAG,"result -=-=- >" + json);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    if (mBufferedReader != null) {
+                        try {
+                            mBufferedReader.close();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }).start();
     }
 }

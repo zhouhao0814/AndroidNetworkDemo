@@ -40,5 +40,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha02'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
+    implementation 'fr.matthieu-vergne:ioutils:1.0'
 
 }
