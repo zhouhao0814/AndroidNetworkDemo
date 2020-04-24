@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 
@@ -44,6 +45,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private Handler mHandler;
@@ -58,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mPostResult1;
     private String result = null;
     String BASE_URL = "http://192.168.0.2:9102";
+    private Request mRequest;
+    private OkHttpClient mOkHttpClient;
     
     //Activity start .
     @Override
@@ -352,47 +359,68 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                InputStream inputStream = null;
-                FileOutputStream fileOutputStream = null;
-                try {
-                    URL url = new URL(BASE_URL + "/download/11");
-                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                    httpURLConnection.setRequestMethod("GET");
-                    httpURLConnection.setConnectTimeout(10000);
-                    httpURLConnection.setRequestProperty("Accept-Language","zh-CN,zh;q=0.9");
-                    httpURLConnection.setRequestProperty("Accept","*/*");
-                    httpURLConnection.connect();
-                    int responseCode = httpURLConnection.getResponseCode();
-                    if (responseCode == httpURLConnection.HTTP_OK) {
-                        String headerField = httpURLConnection.getHeaderField("\"Content-disposition\"");
-                        Log.d(TAG,"headerField == > " + headerField);
-                        String fileName = headerField.replace("attachment; filename=","");
-                        Log.d(TAG,"fileName -- > " + fileName);
-                        File picFile =  RequestTestActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-                        if (!picFile.exists()) {
-                            picFile.mkdirs();
-                        }
-                        File file = new File(picFile + File.separator + fileName);
-                        if (!file.exists()) {
-                            file.createNewFile();
-                        }
-                        fileOutputStream = new FileOutputStream(file);
-                        inputStream = httpURLConnection.getInputStream();
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        while((len = inputStream.read(buffer,0,buffer.length)) != -1){
-                          fileOutputStream.write(buffer,0,len);
-                        }
-                        fileOutputStream.flush();
-                        
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }finally {
-//                    IOUtils.ioClose(inputStream);
-//                    IOUtils.ioClose(fileOutputStream);
-                }
+//                InputStream inputStream = null;
+//                FileOutputStream fileOutputStream = null;
+//                try {
+//                    URL url = new URL(BASE_URL + "/download/11");
+//                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+//                    httpURLConnection.setRequestMethod("GET");
+//                    httpURLConnection.setConnectTimeout(10000);
+//                    httpURLConnection.setRequestProperty("Accept-Language","zh-CN,zh;q=0.9");
+//                    httpURLConnection.setRequestProperty("Accept","*/*");
+//                    httpURLConnection.connect();
+//                    int responseCode = httpURLConnection.getResponseCode();
+//                    if (responseCode == httpURLConnection.HTTP_OK) {
+//                        String headerField = httpURLConnection.getHeaderField("\"Content-disposition\"");
+//                        Log.d(TAG,"headerField == > " + headerField);
+//                        String fileName = headerField.replace("attachment; filename=","");
+//                        Log.d(TAG,"fileName -- > " + fileName);
+//                        File picFile =  RequestTestActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//                        if (!picFile.exists()) {
+//                            picFile.mkdirs();
+//                        }
+//                        File file = new File(picFile + File.separator + fileName);
+//                        if (!file.exists()) {
+//                            file.createNewFile();
+//                        }
+//                        fileOutputStream = new FileOutputStream(file);
+//                        inputStream = httpURLConnection.getInputStream();
+//                        byte[] buffer = new byte[1024];
+//                        int len;
+//                        while((len = inputStream.read(buffer,0,buffer.length)) != -1){
+//                          fileOutputStream.write(buffer,0,len);
+//                        }
+//                        fileOutputStream.flush();
+
+//                    }
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }finally {
+////                    IOUtils.ioClose(inputStream);
+////                    IOUtils.ioClose(fileOutputStream);
+//                }
+                Toast.makeText(MainActivity.this,"麻烦你别再点我了，再点你也不会得到我！！！",Toast.LENGTH_SHORT).show();
             }
         }).start();
     }
+    public void asyncGet(View view){
+        //获取商城的分类信息
+        String url = "https://www.sunofbeach.net/shop/api/discovery/categories";
+        //创建client，理解为创建浏览器
+        mOkHttpClient = new OkHttpClient();
+        //创建请求内容
+        mRequest = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+    }
+    
+    //用浏览器创建调用任务
+//    Call mCall = OkHttpClient.newCall(mRequest);
+//    mCall.enqueue(new Handler.Callback(){
+//
+//    });
+    Call mCall = mOkHttpClient.newCall(mRequest);
+    //执行任务
+    
 }
