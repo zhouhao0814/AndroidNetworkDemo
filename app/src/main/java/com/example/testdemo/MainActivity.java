@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.method.MovementMethod;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 
 import androidx.annotation.NonNull;
@@ -25,6 +27,8 @@ import com.example.testdemo.domain.MomentItem;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mImageResult;
     private TextView mPostResult1;
     private String result = null;
+    String BASE_URL = "http://192.168.0.2:9102";
     
     //Activity start .
     @Override
@@ -89,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         mResultList.setLayoutManager(new LinearLayoutManager(this));
         mResultAdapter = new ResultAdapter();
         mResultList.setAdapter(mResultAdapter);
+        
     }
     
     public void loadjson(View view){
@@ -305,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG,"sb result -->" + sb.toString());
                     }
                     String params = sb.toString();
-                    String BASE_URL = "http://192.168.0.2:9102";
+                 
                     
                     if (params != null && params.length() > 0) {
                         mUrl = new URL(BASE_URL + api + params);
@@ -337,6 +343,54 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
+                }
+            }
+        }).start();
+    }
+    
+    public void downFile(View view){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                InputStream inputStream = null;
+                FileOutputStream fileOutputStream = null;
+                try {
+                    URL url = new URL(BASE_URL + "/download/11");
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                    httpURLConnection.setRequestMethod("GET");
+                    httpURLConnection.setConnectTimeout(10000);
+                    httpURLConnection.setRequestProperty("Accept-Language","zh-CN,zh;q=0.9");
+                    httpURLConnection.setRequestProperty("Accept","*/*");
+                    httpURLConnection.connect();
+                    int responseCode = httpURLConnection.getResponseCode();
+                    if (responseCode == httpURLConnection.HTTP_OK) {
+                        String headerField = httpURLConnection.getHeaderField("\"Content-disposition\"");
+                        Log.d(TAG,"headerField == > " + headerField);
+                        String fileName = headerField.replace("attachment; filename=","");
+                        Log.d(TAG,"fileName -- > " + fileName);
+                        File picFile =  RequestTestActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                        if (!picFile.exists()) {
+                            picFile.mkdirs();
+                        }
+                        File file = new File(picFile + File.separator + fileName);
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+                        fileOutputStream = new FileOutputStream(file);
+                        inputStream = httpURLConnection.getInputStream();
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while((len = inputStream.read(buffer,0,buffer.length)) != -1){
+                          fileOutputStream.write(buffer,0,len);
+                        }
+                        fileOutputStream.flush();
+                        
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+//                    IOUtils.ioClose(inputStream);
+//                    IOUtils.ioClose(fileOutputStream);
                 }
             }
         }).start();
