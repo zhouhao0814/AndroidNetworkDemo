@@ -1,51 +1,36 @@
 package com.example.testdemo;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.text.method.MovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
-
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.testdemo.domain.CommentItem;
 import com.example.testdemo.domain.GetTextItem;
 import com.example.testdemo.domain.MomentItem;
 import com.google.gson.Gson;
-
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -76,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         mLoadImage = findViewById(R.id.btn_image);
         mPostResult = findViewById(R.id.btn_post_result);
         mPostResult1 = findViewById(R.id.text_result_post);
-        
         mHandler = new Handler(){
             @Override
             public void handleMessage( Message msg) {
@@ -111,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
            @Override
            public void run() {
                try {
-                   
                    URL url = new URL("http://192.168.0.2:9102/get/text");
 //                   URL url = new URL("http://sunofbeaches.com/shop/api/discovery/categories");
                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -120,9 +103,7 @@ public class MainActivity extends AppCompatActivity {
                    connection.setRequestProperty("Accept-Language", "zh-CN,zh");
 //                   connection.setRequestProperty("Accept-Encoding","gzip,deflate");
                    connection.setRequestProperty("Accept","*/*");
-                   Log.d(TAG, "1111111");
                    connection.connect();
-                   Log.d(TAG, "1111112");
                    //结构码
                    int responseCode = connection.getResponseCode();
                    Log.d(TAG, "responseCode"+responseCode);
@@ -356,9 +337,9 @@ public class MainActivity extends AppCompatActivity {
     }
     
     public void downFile(View view){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
 //                InputStream inputStream = null;
 //                FileOutputStream fileOutputStream = null;
 //                try {
@@ -399,9 +380,10 @@ public class MainActivity extends AppCompatActivity {
 ////                    IOUtils.ioClose(inputStream);
 ////                    IOUtils.ioClose(fileOutputStream);
 //                }
-                Toast.makeText(MainActivity.this,"麻烦你别再点我了，再点你也不会得到我！！！",Toast.LENGTH_SHORT).show();
-            }
-        }).start();
+
+//            }
+//        }).start();
+        Toast.makeText(this,"麻烦你别再点我了，再点你也不会得到我！！！",Toast.LENGTH_SHORT).show();
     }
     public void asyncGet(View view){
         //获取商城的分类信息
@@ -420,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
 //    mCall.enqueue(new Handler.Callback(){
 //
 //    });
-    Call mCall = mOkHttpClient.newCall(mRequest);
+//    Call mCall = mOkHttpClient.newCall(mRequest);
     //执行任务
     
 }
